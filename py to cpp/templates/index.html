@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Py2Cpp | Python to C++17 Source-to-Source Transpiler</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<header class="navbar">
+    <div class="logo">
+        <span class="logo-icon">&lt;/&gt;</span>
+        <div>
+            <h2>Py2Cpp</h2>
+            <small>AST &amp; IR Source-to-Source Compiler</small>
+        </div>
+    </div>
+
+    <div class="nav-right">
+        <label class="opt-toggle" title="Enable Constant Folding, Algebraic Simplification, and Dead Code Elimination">
+            <input type="checkbox" id="optimizeToggle" checked>
+            <span>IR Optimization</span>
+        </label>
+        <span class="status-dot"></span>
+        <span>C++17 / G++ Ready</span>
+    </div>
+</header>
+
+<main class="container">
+
+    <section class="hero">
+        <div class="tag">COMPILER CONSTRUCTION WORKSPACE</div>
+        <h1>Python 3 <span>→</span> C++17 Transpiler</h1>
+        <p>Parse Python AST, infer static types, generate typed Intermediate Representation, and compile directly with G++.</p>
+    </section>
+
+    <section class="workspace">
+
+        <!-- LEFT PANEL: PYTHON SOURCE -->
+        <div class="panel">
+            <div class="panel-header">
+                <h3>Python Source Code</h3>
+                <div class="header-actions">
+                    <select id="exampleSelect" class="select-control" title="Load sample program">
+                        <option value="basic">Sample: Basic Math</option>
+                        <option value="functions">Sample: Functions &amp; Recursion</option>
+                        <option value="loops">Sample: Loops &amp; Comprehensions</option>
+                        <option value="collections">Sample: Lists, Dicts &amp; Strings</option>
+                        <option value="oop">Sample: Classes &amp; Inheritance</option>
+                        <option value="exceptions">Sample: Try / Except / Raise</option>
+                    </select>
+                    <label for="pyFileUpload" class="upload-btn" title="Upload a .py file">
+                        Upload .py
+                    </label>
+                    <input type="file" id="pyFileUpload" accept=".py" hidden>
+                </div>
+            </div>
+
+            <textarea id="pythonCode" spellcheck="false">def add(a, b):
+    return a + b
+
+def calculate(x, y):
+    result = add(x, y)
+    return result * 2
+
+answer = calculate(10, 20)
+print("Answer:", answer)</textarea>
+
+            <div class="editor-footer">
+                <span id="lineColInfo">Python 3 • Ready</span>
+                <div class="btn-group">
+                    <button class="sample-btn" id="sampleBtn" type="button">Load Example</button>
+                    <button class="sample-btn danger-btn" id="clearBtn" type="button">Clear / Reset</button>
+                </div>
+            </div>
+
+            <button class="convert-btn" id="convertBtn" type="button">
+                ⚡ Convert to C++
+            </button>
+
+            <!-- HISTORY BAR -->
+            <div class="history-box">
+                <div class="history-header">
+                    <span>Recent Conversions</span>
+                    <button id="clearHistoryBtn" class="mini-btn" type="button">Clear History</button>
+                </div>
+                <div id="historyList" class="history-list">
+                    <span class="muted">No conversions yet.</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT PANEL: COMPILER STAGES & C++ EXECUTION -->
+        <div class="panel output-panel">
+            <div class="panel-header">
+                <h3>Compiler Pipeline &amp; C++ Output</h3>
+                <div class="header-actions">
+                    <button id="downloadCppBtn" class="mini-btn" type="button" title="Download output.cpp">Download .cpp</button>
+                    <button id="copyBtn" type="button">Copy</button>
+                </div>
+            </div>
+
+            <div class="tabs">
+                <button class="tab active" data-tab="cpp" type="button">C++17 Code</button>
+                <button class="tab" data-tab="ast" type="button">AST</button>
+                <button class="tab" data-tab="analysis" type="button">Analysis</button>
+                <button class="tab" data-tab="ir" type="button">Intermediate Code</button>
+            </div>
+
+            <!-- Interactive AST Tree Sub-Toolbar -->
+            <div id="astControls" class="ast-controls hidden">
+                <button id="toggleAstViewBtn" class="mini-btn" type="button">Switch to Raw AST Dump</button>
+                <button id="expandAllAstBtn" class="mini-btn" type="button">Expand All</button>
+                <button id="collapseAllAstBtn" class="mini-btn" type="button">Collapse All</button>
+            </div>
+
+            <!-- Editable C++ Editor (shown on C++ tab) -->
+            <textarea id="cppCodeEditor" class="code-box" spellcheck="false" placeholder="// Generated C++17 code will appear here..."></textarea>
+
+            <!-- Interactive AST Tree View -->
+            <div id="astTreeContainer" class="tree-box hidden"></div>
+
+            <!-- Preformatted Output for Raw AST, Analysis, IR, and Errors -->
+            <pre id="outputArea" class="hidden">Your compiler output will appear here.
+
+Enter Python code and click "Convert to C++" to begin.</pre>
+
+            <!-- G++ Compile & Run Controls -->
+            <div class="exec-toolbar">
+                <button id="compileBtn" class="action-btn compile-btn" type="button">🛠 Compile C++ (G++)</button>
+                <button id="runBtn" class="action-btn run-btn" type="button">▶ Run Executable</button>
+            </div>
+
+            <!-- Program Stdin & Terminal Output -->
+            <div class="terminal-section">
+                <div class="terminal-header">
+                    <span>Program Stdin (Optional Input)</span>
+                </div>
+                <textarea id="stdinInput" class="stdin-box" placeholder="Enter standard input lines here if your program calls input()..."></textarea>
+
+                <div class="terminal-header">
+                    <span>Terminal / Compiler Diagnostics</span>
+                    <span id="status">Ready to compile</span>
+                </div>
+                <pre id="terminalOutput" class="terminal-box">Click "Convert to C++", then "Compile C++ (G++)" and "Run Executable".</pre>
+            </div>
+        </div>
+
+    </section>
+
+    <section class="features">
+        <div class="feature-card">
+            <span>01</span>
+            <h3>AST &amp; Type Inference</h3>
+            <p>Full Python 3 AST parsing with scope-aware type deduction into C++17 primitives and STL containers.</p>
+        </div>
+
+        <div class="feature-card">
+            <span>02</span>
+            <h3>Typed IR &amp; Optimizer</h3>
+            <p>Language-independent Intermediate Representation with constant folding and dead-code elimination.</p>
+        </div>
+
+        <div class="feature-card">
+            <span>03</span>
+            <h3>G++ Compile &amp; Execute</h3>
+            <p>Edit generated C++17 directly, compile safely with g++, and verify execution output in real time.</p>
+        </div>
+    </section>
+
+</main>
+
+<footer>
+    Py2Cpp Transpiler | Design and Development of a Python-to-C++ Source-to-Source Transpiler
+</footer>
+
+<script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
